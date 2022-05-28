@@ -92,7 +92,7 @@ func init() {
 func main() {
 	r := setupRouter()
 	// Listen and Server in 0.0.0.0:8080
-	port := os.Getenv("PORT")
+	port := os.Getenv("PATH")
 
 	if port == "" {
 		port = "8080"
