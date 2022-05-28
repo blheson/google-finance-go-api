@@ -3,7 +3,9 @@ package main
 import (
 	"net/http"
 
+	"github.com/blheson/project/request"
 	"github.com/gin-gonic/gin"
+	"github.com/subosito/gotenv"
 )
 
 var db = make(map[string]string)
@@ -13,20 +15,37 @@ func setupRouter() *gin.Engine {
 	// gin.DisableConsoleColor()
 	r := gin.Default()
 
-	// Ping test
-	r.GET("/ping", func(c *gin.Context) {
-		c.String(http.StatusOK, "pong")
+	// Index
+	r.GET("/", func(c *gin.Context) {
+		c.String(http.StatusOK, request.Greet("Welcome to BlessingUdor Finance GO Api"))
 	})
 
 	// Get user value
-	r.GET("/user/:name", func(c *gin.Context) {
-		user := c.Params.ByName("name")
-		value, ok := db[user]
-		if ok {
-			c.JSON(http.StatusOK, gin.H{"user": user, "value": value})
-		} else {
-			c.JSON(http.StatusOK, gin.H{"user": user, "status": "no value"})
+	// r.GET("/user/:name", func(c *gin.Context) {
+	// 	user := c.Params.ByName("name")
+	// 	value, ok := db[user]
+	// 	if ok {
+	// 		c.JSON(http.StatusOK, gin.H{"user": user, "value": value})
+	// 	} else {
+	// 		c.JSON(http.StatusOK, gin.H{"user": user, "status": "no value"})
+	// 	}
+	// })
+	r.GET("/search", func(c *gin.Context) {
+
+		// log.Print("==========>", "/search?q="+c.Query("q"), "========>")
+		//TODO: handle other keys in query
+		body, err := request.Get("/search/?q=" + c.Query("q"))
+
+		if err != nil {
+			print(err)
+
+			return
 		}
+		// gin.H{"body": string(body)}
+		// fmt.Println("\n" + )
+		// fmt.Println(string(body))
+		c.JSON(http.StatusOK, string(body))
+
 	})
 
 	// Authorized group (uses gin.BasicAuth() middleware)
@@ -66,7 +85,9 @@ func setupRouter() *gin.Engine {
 
 	return r
 }
-
+func init() {
+	gotenv.Load()
+}
 func main() {
 	r := setupRouter()
 	// Listen and Server in 0.0.0.0:8080
